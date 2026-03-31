@@ -1,20 +1,155 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Activity, Zap, Cpu, ScanLine, Waypoints, Focus } from 'lucide-react';
+import { ArrowRight, Activity, Zap, ShieldCheck, CreditCard, LayoutGrid, Plus, Check, X, Globe, Banknote, Lock, Mail } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 // ==============================
+// Login Popup Modal
+// ==============================
+const LoginModal = ({ isOpen, onClose }) => {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      gsap.fromTo('.login-backdrop', { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(modalRef.current, 
+        { y: 30, opacity: 0, scale: 0.95 }, 
+        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out', delay: 0.1 }
+      );
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center px-4">
+      {/* Backdrop */}
+      <div 
+        className="login-backdrop absolute inset-0 bg-slate-900/30 backdrop-blur-md"
+        onClick={onClose}
+      ></div>
+      
+      {/* Modal Dialog */}
+      <div 
+        ref={modalRef} 
+        className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 md:p-10 shadow-float"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 w-10 h-10 bg-slate-50 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+        >
+          <X size={20} />
+        </button>
+        
+        <div className="mb-8 text-center pt-2">
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-soft border border-slate-100 relative">
+             <div className="absolute w-8 h-8 rounded-full bg-emerald-500 animate-pulse opacity-50 blur-sm"></div>
+             <div className="w-6 h-6 rounded-full bg-emerald-500 relative z-10 shadow-glow"></div>
+          </div>
+          <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Criar Conta</h2>
+          <p className="text-slate-500 font-medium text-sm">Abra sua conta MindStack para otimizar fluxos</p>
+        </div>
+
+        <form className="flex flex-col gap-4 mb-6" onSubmit={(e) => e.preventDefault()}>
+          <div className="text-left w-full">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Email Workspace</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+              <input 
+                type="email" 
+                placeholder="nome@empresa.com" 
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-400 placeholder:font-medium"
+              />
+            </div>
+          </div>
+          <button className="w-full mt-4 py-4 rounded-2xl bg-emerald-500 text-white font-bold text-lg hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-glow flex justify-center items-center gap-2">
+            Continuar para Foco <ArrowRight size={18} />
+          </button>
+        </form>
+        
+        <div className="flex items-center gap-4 my-8">
+          <div className="flex-1 h-px bg-slate-200"></div>
+          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Login Seguro</span>
+          <div className="flex-1 h-px bg-slate-200"></div>
+        </div>
+
+        <button className="w-full py-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white font-bold hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+          Entrar com conta Coporativa
+        </button>
+        
+        <p className="text-xs text-center text-slate-400 font-semibold mt-8 px-4 leading-relaxed">
+          Ao abrir sua conta, você concorda com nossos robustos Protocolos de Privacidade Bank-Grade.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ==============================
+// Corporate Popup Modal
+// ==============================
+const CorporateAccessModal = ({ isOpen, onClose }) => {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      gsap.fromTo('.modal-backdrop', { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(modalRef.current, 
+        { y: 30, opacity: 0, scale: 0.95 }, 
+        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out', delay: 0.1 }
+      );
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+      <div className="modal-backdrop absolute inset-0 bg-slate-900/30 backdrop-blur-md" onClick={onClose}></div>
+      <div ref={modalRef} className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-10 shadow-float">
+        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 bg-slate-50 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+          <X size={20} />
+        </button>
+        
+        <div className="mb-8 pr-8">
+          <div className="w-14 h-14 bg-emerald-100 rounded-[1.2rem] flex items-center justify-center mb-6">
+             <Zap size={28} className="text-emerald-500" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Acesso Coporativo</h2>
+          <p className="text-slate-500 font-medium text-base leading-relaxed">Como você gostaria de otimizar a produtividade e a economia de tempo da sua operação?</p>
+        </div>
+
+        <div className="flex flex-col gap-3 mb-8">
+          {[
+            'Escalar Foco Individual (C-Level)',
+            'Gerenciar Tempo de Múltiplas Equipes',
+            'Integração com ERP e Sistemas Legados'
+          ].map((opt, i) => (
+            <button key={i} className="w-full text-left px-6 py-4 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-glow transition-all group flex items-center justify-between">
+              <span className="font-bold text-slate-800 group-hover:text-emerald-700">{opt}</span>
+              <ArrowRight size={18} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
+            </button>
+          ))}
+        </div>
+        
+        <p className="text-xs text-center text-slate-400 font-semibold">Os dados serão utilizados pela IA para moldar o seu ambiente inicial.</p>
+      </div>
+    </div>
+  );
+};
+
+// ==============================
 // Navbar Component
 // ==============================
-const Navbar = () => {
+const Navbar = ({ onOpenPopup }) => {
   const navRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
-        start: 'top -50',
+        start: 'top -20',
         end: 99999,
         toggleClass: { className: 'nav-scrolled', targets: navRef.current },
       });
@@ -26,16 +161,22 @@ const Navbar = () => {
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
       <nav
         ref={navRef}
-        className="flex items-center justify-between w-full max-w-4xl px-6 py-3 transition-all duration-300 border border-transparent rounded-full nav-base bg-transparent [&.nav-scrolled]:bg-background/60 [&.nav-scrolled]:backdrop-blur-xl [&.nav-scrolled]:border-white/10"
+        className="flex items-center justify-between w-full max-w-5xl px-8 py-3 transition-all duration-300 border border-transparent rounded-[2rem] nav-base bg-white/70 backdrop-blur-md [&.nav-scrolled]:bg-white/90 [&.nav-scrolled]:shadow-soft [&.nav-scrolled]:border-slate-200"
       >
-        <span className="text-xl font-bold tracking-tight text-white">MindStack</span>
+        <span className="text-2xl font-black tracking-tighter text-slate-900 flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-emerald-500"></div>
+          MindStack
+        </span>
         <div className="hidden gap-8 md:flex">
-          <a href="#features" className="text-sm font-medium transition-colors text-slate-300 hover:text-white">Plataforma</a>
-          <a href="#philosophy" className="text-sm font-medium transition-colors text-slate-300 hover:text-white">Filosofia</a>
-          <a href="#protocol" className="text-sm font-medium transition-colors text-slate-300 hover:text-white">Protocolo</a>
+          <a href="#features" className="text-sm font-semibold transition-colors text-slate-600 hover:text-emerald-600">Soluções</a>
+          <a href="#philosophy" className="text-sm font-semibold transition-colors text-slate-600 hover:text-emerald-600">Ecossistema</a>
+          <a href="#protocol" className="text-sm font-semibold transition-colors text-slate-600 hover:text-emerald-600">Integração</a>
         </div>
-        <button className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white transition-all bg-indigo-600 rounded-full hover:scale-[1.03] active:scale-95 magnetic-btn">
-          <span>Iniciar</span>
+        <button 
+          onClick={onOpenPopup}
+          className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white transition-all bg-emerald-500 rounded-full hover:bg-emerald-600 active:scale-95 shadow-glow cursor-pointer"
+        >
+          <span>Acesso Corporativo</span>
           <ArrowRight size={16} />
         </button>
       </nav>
@@ -46,100 +187,154 @@ const Navbar = () => {
 // ==============================
 // Hero Section
 // ==============================
-const HeroSection = () => {
+const HeroSection = ({ onOpenLogin }) => {
   const containerRef = useRef(null);
+  const contentRef = useRef(null);
+  const particlesRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Fade-up animation on load
       gsap.from('.hero-element', {
         y: 40,
         opacity: 0,
         duration: 1,
-        stagger: 0.08,
+        stagger: 0.1,
         ease: 'power3.out',
-        delay: 0.2
+        delay: 0.1
+      });
+
+      // Smooth Parallax on scroll
+      gsap.to(contentRef.current, {
+        y: '20vh',
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+      
+      // Particles parallax effect
+      gsap.to('.hero-particle', {
+        y: (i, el) => -250 * parseFloat(el.getAttribute('data-speed')),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        }
       });
     }, containerRef);
     return () => ctx.revert();
   }, []);
 
+  const particles = Array.from({ length: 25 }).map((_, i) => ({
+    id: i,
+    width: Math.random() * 8 + 4,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    speed: Math.random() * 2 + 0.5,
+    delay: Math.random() * 3
+  }));
+
   return (
-    <section ref={containerRef} className="relative flex flex-col justify-end w-full min-h-[100dvh] pb-24 px-6 md:px-16 overflow-hidden">
-      {/* Background Image & Gradient */}
-      <div className="absolute inset-0 z-0 bg-slate-900">
-        <img 
-          src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop" 
-          alt="Dark server architecture"
-          className="object-cover w-full h-full opacity-30 mix-blend-luminosity"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
+    <section ref={containerRef} className="relative flex flex-col justify-center items-center text-center w-full min-h-[90dvh] pt-32 pb-24 px-6 md:px-16 overflow-hidden bg-slate-50">
+      
+      {/* Background Graphic with Animation */}
+      <div className="absolute top-0 left-0 right-0 bottom-0 overflow-hidden pointer-events-none z-0 flex justify-center items-center">
+        <div className="absolute w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-emerald-400/20 blur-[100px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-blob"></div>
+        <div className="absolute w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-blue-300/10 blur-[100px] rounded-full top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/3 animate-blob" style={{animationDelay: '2s'}}></div>
+      </div>
+      
+      {/* Background Particles that interact with Scroll */}
+      <div ref={particlesRef} className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {particles.map(p => (
+          <div 
+            key={p.id} 
+            className="hero-particle absolute rounded-full bg-emerald-500/20"
+            data-speed={p.speed}
+            style={{ 
+              width: p.width, 
+              height: p.width, 
+              left: `${p.left}%`, 
+              top: `${p.top}%`, 
+              animation: `blob ${4 + p.delay}s infinite alternate ease-in-out` 
+            }}
+          />
+        ))}
       </div>
 
-      <div className="relative z-10 max-w-5xl">
-        <h1 className="flex flex-col mb-8 leading-none">
-          <span className="hero-element font-bold text-4xl md:text-6xl lg:text-7xl font-sans tracking-tight text-slate-200">
-            O fim da sua
+      <div ref={contentRef} className="relative z-10 max-w-4xl flex flex-col items-center">
+        <div className="hero-element inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-8">
+          <Zap size={16} className="fill-emerald-500" />
+          <span>Gestão de Alta Frequência Atualizada</span>
+        </div>
+        
+        <h1 className="hero-element mb-6 leading-[1.1] text-slate-900 tracking-tight">
+          <span className="block text-4xl md:text-7xl font-sans font-black">
+            Financiando seu
           </span>
-          <span className="hero-element font-serif italic text-7xl md:text-9xl text-indigo-400 mt-2 -ml-2">
-            sobrecarga
+          <span className="block font-serif italic text-5xl md:text-8xl text-emerald-500 mt-2">
+            tempo focado.
           </span>
         </h1>
-        <p className="hero-element max-w-xl text-lg md:text-xl text-slate-400 mb-10 font-medium">
-          A MindStack é uma plataforma de produtividade que usa Inteligência Artificial para organizar, priorizar e otimizar tudo que você precisa fazer.
+        
+        <p className="hero-element max-w-2xl text-base md:text-xl text-slate-500 mb-10 font-medium leading-relaxed">
+          Abra "contas" de tempo e gerencie a economia da sua produtividade online. Acesso a fluxos de trabalho internacionais estruturados pela MindStack.
         </p>
-        <button className="hero-element flex items-center gap-3 px-8 py-4 text-base font-semibold text-white transition-all bg-indigo-600 rounded-full hover:scale-[1.03] hover:bg-indigo-500 magnetic-btn shadow-[0_0_30px_-5px_rgba(99,102,241,0.4)]">
-          <span>Iniciar Otimização</span>
-          <Zap size={18} />
-        </button>
+        
+        <div className="hero-element flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+          <button 
+             onClick={onOpenLogin}
+             className="flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 text-base font-bold text-white transition-all bg-slate-900 rounded-full hover:bg-slate-800 active:scale-95 shadow-xl cursor-pointer"
+          >
+            <span>Abrir Conta Grátis</span>
+          </button>
+          <button className="flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-900 transition-all bg-white border border-slate-200 rounded-full hover:bg-slate-50 active:scale-95 shadow-sm">
+            <span>Falar com Vendas</span>
+          </button>
+        </div>
       </div>
     </section>
   );
 };
 
 // ==============================
-// Features Section
+// Features Section (FinTech Styled)
 // ==============================
-const DiagnosticShufflerCard = () => {
-  const [items, setItems] = useState([
-    { id: 1, label: 'Email do Cliente', type: 'Baixa', color: 'text-slate-400' },
-    { id: 2, label: 'Ajuste de Design', type: 'Média', color: 'text-amber-400' },
-    { id: 3, label: 'Lançamento V2', type: 'Crítica', color: 'text-rose-400' }
-  ]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setItems(prev => {
-        const newArr = [...prev];
-        const last = newArr.pop();
-        newArr.unshift(last);
-        return newArr;
-      });
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+const TransactionListCard = () => {
+  const transactions = [
+    { id: 1, name: 'Reunião Executiva', category: 'High Priority', amount: '- 1.5h', icon: <Activity size={18} className="text-emerald-600"/>, bg: 'bg-emerald-100' },
+    { id: 2, name: 'Design Sprint', category: 'Project', amount: '- 3.0h', icon: <LayoutGrid size={18} className="text-blue-600"/>, bg: 'bg-blue-100' },
+    { id: 3, name: 'Revisão de Código', category: 'Routine', amount: '- 0.5h', icon: <Check size={18} className="text-slate-600"/>, bg: 'bg-slate-100' },
+  ];
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 border border-white/5 rounded-3xl p-8 hover:border-indigo-500/30 transition-colors relative overflow-hidden group">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-bold font-sans">Triagem Automática</h3>
-        <ScanLine className="text-indigo-500" size={24} />
+    <div className="flex flex-col h-full bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-float relative overflow-hidden group">
+      <div className="mb-8 flex items-center justify-between">
+        <h3 className="text-2xl font-bold font-sans text-slate-900">Histórico de Foco</h3>
+        <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors">
+          <Plus size={20} className="text-slate-600" />
+        </button>
       </div>
-      <p className="text-slate-400 text-sm mb-8 flex-1">A IA categoriza e atribui peso semântico a cada nova tarefa antes mesmo de você ver.</p>
       
-      <div className="relative h-48 w-full">
-        {items.map((item, i) => (
-          <div
-            key={item.id}
-            className="absolute left-0 right-0 bg-slate-950 border border-white/10 rounded-2xl p-4 flex justify-between items-center transition-all duration-[800ms] shadow-xl"
-            style={{
-              transform: `translateY(${i * 15}px) scale(${1 - i * 0.05})`,
-              zIndex: 10 - i,
-              opacity: 1 - i * 0.2,
-              filter: `blur(${i}px)`,
-            }}
-          >
-            <span className="font-mono text-xs">{item.label}</span>
-            <span className={`text-[10px] uppercase font-bold tracking-wider ${item.color}`}>{item.type}</span>
+      <div className="flex flex-col gap-4">
+        {transactions.map((t) => (
+          <div key={t.id} className="flex items-center justify-between group/item hover:bg-slate-50 p-2 -mx-2 rounded-2xl transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-full ${t.bg} flex items-center justify-center`}>
+                {t.icon}
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-900">{t.name}</span>
+                <span className="text-xs font-semibold text-slate-400">{t.category}</span>
+              </div>
+            </div>
+            <span className="font-mono font-bold text-slate-900">{t.amount}</span>
           </div>
         ))}
       </div>
@@ -147,100 +342,166 @@ const DiagnosticShufflerCard = () => {
   );
 };
 
-const TelemetryTypewriterCard = () => {
-  const textRaw = "> Analisando 14 tarefas...\n> Padrão detectado: Foco disperso.\n> Otimizando fila...\n> Prioridade: [REUNIÃO EXECUTIVA - 14H]";
-  const [text, setText] = useState("");
-  const [cursor, setCursor] = useState(true);
-
-  useEffect(() => {
-    let i = 0;
-    const typing = setInterval(() => {
-      setText(textRaw.slice(0, i));
-      i++;
-      if (i > textRaw.length) clearInterval(typing);
-    }, 50);
-
-    const blink = setInterval(() => setCursor(c => !c), 500);
-    return () => { clearInterval(typing); clearInterval(blink); };
-  }, []);
-
+const BalanceCard = () => {
   return (
-    <div className="flex flex-col h-full bg-slate-900 border border-white/5 rounded-3xl p-8 hover:border-indigo-500/30 transition-colors relative overflow-hidden group">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-bold font-sans">Foco Dinâmico</h3>
-        <div className="flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-xs font-mono">
-          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-          Live Feed
-        </div>
-      </div>
-      <p className="text-slate-400 text-sm mb-8 flex-1">O sistema lê o contexto do seu dia e reestrutura o que precisa de atenção imediata.</p>
+    <div className="flex flex-col h-full bg-emerald-500 rounded-[2.5rem] p-8 shadow-glow relative overflow-hidden group text-white">
+      {/* Decorative vectors */}
+      <svg className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/4 w-64 h-64 opacity-20 pointer-events-none" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="40" stroke="white" strokeWidth="20" />
+      </svg>
       
-      <div className="bg-slate-950 rounded-2xl p-5 border border-white/5 h-48 font-mono text-[11px] leading-relaxed text-slate-300 relative">
-        <pre className="whitespace-pre-wrap font-inherit">{text}{cursor ? <span className="text-indigo-500">_</span> : <span className="text-transparent">_</span>}</pre>
+      <div className="mb-2 flex items-center justify-between relative z-10">
+        <span className="text-emerald-100 font-semibold text-sm uppercase tracking-wider">Saldo de Produtividade</span>
+        <CreditCard size={20} className="text-emerald-200" />
       </div>
-    </div>
-  );
-};
-
-const CursorProtocolSchedulerCard = () => {
-  const containerRef = useRef(null);
-  
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 });
-      tl.set('.sim-cursor', { x: 0, y: 0, scale: 1 })
-        .to('.sim-cursor', { x: 70, y: 40, duration: 1, ease: 'power2.inOut' })
-        .to('.sim-cursor', { scale: 0.8, duration: 0.1, yoyo: true, repeat: 1 })
-        .to('.cell-target', { backgroundColor: '#4f46e5', color: '#fff', duration: 0.2 }, '-=0.1')
-        .to('.sim-cursor', { x: 220, y: 140, duration: 1, ease: 'power2.inOut', delay: 0.5 })
-        .to('.sim-cursor', { scale: 0.8, duration: 0.1, yoyo: true, repeat: 1 })
-        .to('.btn-save', { backgroundColor: '#4f46e5', duration: 0.2 }, '-=0.1')
-        .to('.sim-cursor', { opacity: 0, duration: 0.3, delay: 0.5 })
-        .to('.cell-target', { backgroundColor: 'transparent', color: '#94a3b8', duration: 0.3 }, '+=0')
-        .to('.btn-save', { backgroundColor: 'rgba(255,255,255,0.05)', duration: 0.3 }, '+=0');
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div ref={containerRef} className="flex flex-col h-full bg-slate-900 border border-white/5 rounded-3xl p-8 hover:border-indigo-500/30 transition-colors relative overflow-hidden group">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xl font-bold font-sans">Execução Otimizada</h3>
-        <Activity className="text-indigo-500" size={24} />
-      </div>
-      <p className="text-slate-400 text-sm mb-8 flex-1">Aloca blocos de 'Deep Work' baseados no seu ritmo energético natural previsto.</p>
       
-      <div className="relative h-48 w-full bg-slate-950 rounded-2xl border border-white/5 p-4 flex flex-col justify-between">
-        <div className="grid grid-cols-7 gap-1 text-[10px] font-mono text-center text-slate-500 mb-2">
-          {['D','S','T','Q','Q','S','S'].map((d,i)=><div key={i}>{d}</div>)}
-        </div>
-        <div className="grid grid-cols-7 gap-1 flex-1">
-          {Array.from({length: 21}).map((_, i) => (
-            <div key={i} className={`rounded-sm border border-white/5 flex items-center justify-center text-[10px] text-slate-400 transition-colors ${i === 10 ? 'cell-target' : ''}`}>
-              {i === 10 ? 'DW' : ''}
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 flex justify-end">
-          <div className="btn-save px-4 py-1.5 rounded bg-white/5 text-xs font-mono text-white transition-colors">Salvar</div>
-        </div>
-        
-        {/* Cursor SVG */}
-        <svg className="sim-cursor absolute top-4 left-4 w-6 h-6 drop-shadow-lg z-20 pointer-events-none" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5.5 3.2L18.4 11.2C19.7 12 18.9 14.1 17.3 13.9L13.1 13.5C12.7 13.4 12.3 13.6 12.1 14L9.8 19.3C9.2 20.8 7.1 20.5 6.9 18.9L5.4 5.3C5.2 3.8 6.9 2.7 8.2 3.5H5.5Z" fill="white" stroke="black" strokeWidth="1.5" strokeLinejoin="round"/>
+      <div className="relative z-10 mb-8 mt-2">
+        <span className="text-5xl font-black font-sans block tracking-tighter">74.5%</span>
+        <span className="text-emerald-200 text-sm font-medium">+12% vs. Mês Anterior</span>
+      </div>
+      
+      {/* Sparkline animated */}
+      <div className="mt-auto relative z-10 h-24 w-full flex items-end">
+        <svg viewBox="0 0 200 60" className="w-full h-full preserve-aspect-none drop-shadow-md" preserveAspectRatio="none" overflow="hidden">
+          <g>
+            <animateTransform attributeName="transform" type="translate" from="0 0" to="-200 0" begin="0s" dur="4s" repeatCount="indefinite" />
+            <path 
+              d="M0,40 C15,35 25,45 40,45 C55,45 65,35 80,35 C95,35 105,50 120,50 C135,50 145,20 160,20 C175,20 185,45 200,40 C215,35 225,45 240,45 C255,45 265,35 280,35 C295,35 305,50 320,50 C335,50 345,20 360,20 C375,20 385,45 400,40 L400,60 L0,60 Z" 
+              fill="rgba(255,255,255,0.2)" 
+            />
+            <path 
+              d="M0,40 C15,35 25,45 40,45 C55,45 65,35 80,35 C95,35 105,50 120,50 C135,50 145,20 160,20 C175,20 185,45 200,40 C215,35 225,45 240,45 C255,45 265,35 280,35 C295,35 305,50 320,50 C335,50 345,20 360,20 C375,20 385,45 400,40" 
+              fill="none" 
+              stroke="white" 
+              strokeWidth="4" 
+              strokeLinecap="round" 
+            />
+          </g>
         </svg>
       </div>
     </div>
   );
 };
 
-const FeaturesSection = () => {
+const SchedulerWidgetCard = () => {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Bar width animation when scrolling into view
+      gsap.fromTo('.limit-bar-fill',
+        { width: '0%' },
+        { 
+          width: (i, el) => el.getAttribute('data-width'), 
+          duration: 1.5, 
+          ease: 'power3.out', 
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: 'top 85%',
+          }
+        }
+      );
+    }, cardRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="features" className="py-32 px-6 md:px-16 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <DiagnosticShufflerCard />
-        <TelemetryTypewriterCard />
-        <CursorProtocolSchedulerCard />
+    <div ref={cardRef} className="flex flex-col h-full bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-float relative overflow-hidden group">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex flex-col">
+          <h3 className="text-2xl font-bold font-sans text-slate-900">Limites Diários</h3>
+          <p className="text-sm font-semibold text-slate-400">Proteção de esgotamento ativa.</p>
+        </div>
+        <ShieldCheck className="text-emerald-500" size={32} />
+      </div>
+      
+      <div className="flex-1 mt-4">
+        <div className="flex flex-col gap-6">
+          <div>
+            <div className="flex justify-between text-sm font-bold text-slate-900 mb-2">
+              <span>Deep Work Limit</span>
+              <span>4 / 5 hs</span>
+            </div>
+            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div className="limit-bar-fill h-full bg-emerald-500 rounded-full" data-width="80%"></div>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between text-sm font-bold text-slate-900 mb-2">
+              <span>Reuniões Agendadas</span>
+              <span>2 / 3 hs</span>
+            </div>
+            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div className="limit-bar-fill h-full bg-blue-500 rounded-full" data-width="66%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button className="mt-8 w-full py-4 rounded-2xl bg-slate-50 text-slate-900 font-bold hover:bg-slate-100 transition-colors flex justify-center items-center gap-2">
+        Ajustar Limites
+      </button>
+    </div>
+  );
+};
+
+const FeaturesSection = () => {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    let mm = gsap.matchMedia();
+
+    // Desktop Animation: Stacked Cards that Fan Out
+    mm.add("(min-width: 1024px)", () => {
+      gsap.set('.feature-card-0', { zIndex: 30, rotation: 0, position: 'absolute' });
+      gsap.set('.feature-card-1', { zIndex: 20, rotation: -2, position: 'absolute' });
+      gsap.set('.feature-card-2', { zIndex: 10, rotation: 2, position: 'absolute' });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 15%', 
+          end: '+=1200', // Aumentar a distância de scroll para espalhar devagar e suavemente
+          scrub: 1,
+          pin: true,
+        }
+      });
+      
+      // Cards se espalham horizontalmente no Desktop
+      tl.to('.feature-card-0', { xPercent: -105, rotation: -3, scale: 0.98, ease: 'power2.inOut' }, 0)
+        .to('.feature-card-2', { xPercent: 105, rotation: 3, scale: 0.98, ease: 'power2.inOut' }, 0)
+        .to('.feature-card-1', { yPercent: -5, scale: 1.02, rotation: 0, ease: 'power2.inOut' }, 0);
+    });
+
+    // Mobile Fix: Remove Stacked Positioning completely.
+    mm.add("(max-width: 1023px)", () => {
+      gsap.set('.feature-card-0, .feature-card-1, .feature-card-2', { 
+        position: 'relative', 
+        clearProps: 'all' 
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
+
+  return (
+    <section id="features" ref={sectionRef} className="py-12 px-6 w-full z-10 relative lg:min-h-screen flex flex-col items-center justify-center -mt-10 lg:-mt-20 overflow-hidden pointer-events-auto">
+      {/* On mobile, it's a grid (flex-col). On desktop, it overlaps (absolute). */}
+      <div className="relative w-full max-w-[1400px] mx-auto flex flex-col lg:block items-center justify-center gap-8 lg:gap-0 lg:h-[520px] lg:perspective-1000">
+        
+        <div className="feature-card-0 w-full lg:w-[340px] xl:w-[400px] lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 lg:mx-auto min-h-[400px] lg:h-full will-change-transform shadow-2xl rounded-[2.5rem] bg-white">
+          <BalanceCard />
+        </div>
+        
+        <div className="feature-card-1 w-full lg:w-[340px] xl:w-[400px] lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 lg:mx-auto min-h-[400px] lg:h-full will-change-transform shadow-2xl rounded-[2.5rem] bg-white">
+          <TransactionListCard />
+        </div>
+        
+        <div className="feature-card-2 w-full lg:w-[340px] xl:w-[400px] lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 lg:mx-auto min-h-[400px] lg:h-full will-change-transform shadow-2xl rounded-[2.5rem] bg-white">
+          <SchedulerWidgetCard />
+        </div>
+        
       </div>
     </section>
   );
@@ -270,18 +531,14 @@ const PhilosophySection = () => {
   }, []);
 
   return (
-    <section id="philosophy" ref={containerRef} className="relative py-40 px-6 md:px-16 overflow-hidden bg-slate-950 flex items-center min-h-[80vh]">
-      <div className="absolute inset-0 z-0 opacity-10">
-        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070" className="object-cover w-full h-full" alt="circuit" />
-      </div>
-      
-      <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col gap-12">
-        <p className="phil-line text-xl md:text-2xl text-slate-400 font-medium">
-          A maioria das ferramentas de produtividade foca em: <span className="text-slate-200">listas intermináveis.</span>
+    <section id="philosophy" ref={containerRef} className="relative py-24 md:py-32 px-6 md:px-16 bg-white flex items-center border-y border-slate-100">
+      <div className="max-w-4xl mx-auto text-center flex flex-col gap-6 md:gap-10">
+        <p className="phil-line text-lg md:text-2xl text-slate-500 font-medium">
+          Sistemas tradicionais vendem "listas infinitas".
         </p>
-        <p className="phil-line text-4xl md:text-7xl">
-          <span className="font-sans font-bold text-slate-200">Nós focamos em: </span>
-          <span className="font-serif italic text-indigo-500">ação.</span>
+        <p className="phil-line text-3xl md:text-6xl text-slate-900 leading-tight">
+          <span className="font-sans font-black">Nós vendemos uma </span>
+          <span className="font-serif italic text-emerald-500 bg-emerald-50 px-4 rounded-xl mt-2 inline-block">economia de foco.</span>
         </p>
       </div>
     </section>
@@ -299,21 +556,14 @@ const ProtocolSection = () => {
       const cards = gsap.utils.toArray('.protocol-card');
       
       cards.forEach((card, i) => {
-        if (i === cards.length - 1) return; // Last card doesn't scale down
+        if (i === cards.length - 1) return;
         
-        ScrollTrigger.create({
-          trigger: card,
-          start: 'top top',
-          pin: true,
-          pinSpacing: false,
-          endTrigger: '.protocol-end', // Container end
-          end: 'bottom bottom',
-        });
-
+        // CSS 'sticky' takes over preserving document flow, so no pin required here.
+        // We only map the scaling and blurring animation to the scrolling overlap.
         gsap.to(card, {
-          scale: 0.9,
-          opacity: 0.5,
-          filter: 'blur(20px)',
+          scale: 0.92,
+          opacity: 0.8,
+          filter: 'blur(10px)',
           scrollTrigger: {
             trigger: cards[i + 1],
             start: 'top bottom',
@@ -329,61 +579,52 @@ const ProtocolSection = () => {
   const protocols = [
     {
       step: '01',
-      title: 'Coleta Neural',
-      desc: 'Capture todos os fragmentos e ideias. A inteligência semântica fará a triagem inicial sem sua intervenção.',
-      visual: (
-         <div className="w-full h-full flex items-center justify-center">
-            <div className="w-32 h-32 rounded-full border border-indigo-500/30 flex items-center justify-center animate-[spin_10s_linear_infinite]">
-               <div className="w-24 h-24 rounded-full border border-indigo-400/50 flex items-center justify-center animate-[spin_8s_linear_infinite_reverse]">
-                  <div className="w-16 h-16 rounded-full bg-indigo-500/20 blur-xl"></div>
-               </div>
-            </div>
-         </div>
-      )
+      title: 'Gerenciamento de Conta Global',
+      desc: 'Sua arquitetura pessoal mantida em servidores de alta disponibilidade mental. A IA gerencia suas pendências como ativos financeiros.',
+      color: 'text-emerald-500',
+      bgVisual: 'bg-emerald-50',
+      icon: <Globe size={100} className="text-emerald-500" />
     },
     {
       step: '02',
-      title: 'Síntese Ativa',
-      desc: 'Os relacionamentos orgânicos entre os dados são formados, transformando uma lista caótica em uma sequência processável.',
-      visual: (
-        <div className="w-full h-full relative overflow-hidden flex flex-col justify-center">
-           <div className="w-full h-[1px] bg-slate-800 relative">
-             <div className="absolute top-0 left-0 w-1/4 h-full bg-indigo-500 shadow-[0_0_20px_2px_rgba(99,102,241,0.8)] animate-[translateX_3s_ease-in-out_infinite_alternate]" style={{ animationName: 'scan' }}></div>
-           </div>
-           <style>{`@keyframes scan { 0% { transform: translateX(0); } 100% { transform: translateX(300%); } }`}</style>
-        </div>
-      )
+      title: 'Pagamentos de Tempo Internacionais',
+      desc: 'Envie blocos de foco para projetos globais. Converta suas intenções em ações processadas antes da bolsa abrir.',
+      color: 'text-blue-500',
+      bgVisual: 'bg-blue-50',
+      icon: <Banknote size={100} className="text-blue-500" />
     },
     {
       step: '03',
-      title: 'Fluxo Contínuo',
-      desc: 'O agendador injeta as tarefas na sua rotina invisivelmente. Sente e deixe o protocolo guiar seu trabalho.',
-      visual: (
-        <div className="w-full h-full flex items-center justify-center relative">
-          <svg viewBox="0 0 100 50" className="w-full stroke-indigo-500 stroke-2 fill-none drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
-            <path d="M0 25 L30 25 L40 10 L60 40 L70 25 L100 25" strokeDasharray="200" strokeDashoffset="200" className="animate-[dash_2s_ease-in-out_infinite]">
-              <animate attributeName="stroke-dashoffset" values="200;0" dur="2s" repeatCount="indefinite" />
-            </path>
-          </svg>
-        </div>
-      )
+      title: 'Segurança Bank-Grade',
+      desc: 'Proteção total contra o déficit de atenção. Barreiras algorítmicas imodificáveis evitam a evasão da sua produtividade.',
+      color: 'text-indigo-500',
+      bgVisual: 'bg-indigo-50',
+      icon: <Lock size={100} className="text-indigo-500" />
     }
   ];
 
   return (
-    <section id="protocol" ref={containerRef} className="relative pb-32">
+    <section id="protocol" ref={containerRef} className="relative pb-24 md:pb-32 bg-slate-50 pt-16 md:pt-20">
+      <div className="text-center mb-12 md:mb-16 px-6">
+        <h2 className="text-3xl font-black text-slate-900">Integração Corporativa</h2>
+        <p className="text-slate-500 text-sm md:text-base font-medium mt-2">Veja os padrões de transação estruturados da MindStack.</p>
+      </div>
+      
       {protocols.map((p, i) => (
-        <div key={i} className="protocol-card min-h-screen w-full flex items-center justify-center sticky top-0 px-6">
-          <div className="max-w-6xl w-full bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden min-h-[60vh] flex flex-col md:flex-row">
+        <div key={i} className="protocol-card min-h-[70vh] md:min-h-[90vh] w-full flex items-center justify-center sticky top-16 md:top-20 px-4 md:px-8">
+          <div className="max-w-5xl w-full bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-float overflow-hidden flex flex-col md:flex-row">
             
-            <div className="w-full md:w-1/2 p-12 lg:p-20 flex flex-col justify-center relative">
-               <span className="font-mono text-indigo-500 text-lg mb-4 block">STEP_{p.step}</span>
-               <h2 className="text-4xl md:text-5xl font-bold font-sans text-white mb-6 leading-tight">{p.title}</h2>
-               <p className="text-lg text-slate-400 font-medium max-w-md leading-relaxed">{p.desc}</p>
+            <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative">
+               <span className={`font-black tracking-widest text-xs md:text-sm mb-4 block ${p.color}`}>PROTOCOLO {p.step}</span>
+               <h2 className="text-3xl md:text-4xl lg:text-5xl font-black font-sans text-slate-900 mb-4 md:mb-6 leading-tight">{p.title}</h2>
+               <p className="text-base md:text-lg text-slate-500 font-medium max-w-sm leading-relaxed">{p.desc}</p>
             </div>
             
-            <div className="w-full md:w-1/2 p-12 bg-slate-950 flex items-center justify-center">
-              {p.visual}
+            <div className={`w-full md:w-1/2 p-8 md:p-12 flex items-center justify-center min-h-[250px] ${p.bgVisual}`}>
+              {/* Clean White Graphic with Lucide Icon */}
+              <div className="w-48 h-48 md:w-64 md:h-64 bg-white rounded-full shadow-lg flex items-center justify-center relative group overflow-hidden">
+                <div className="transform group-hover:scale-110 transition-transform duration-500">{p.icon}</div>
+              </div>
             </div>
             
           </div>
@@ -399,36 +640,36 @@ const ProtocolSection = () => {
 // ==============================
 const PricingSection = () => {
   return (
-    <section className="py-32 px-6 max-w-6xl mx-auto">
-      <div className="text-center mb-20 gap-4 flex flex-col">
-        <h2 className="font-serif italic text-5xl md:text-6xl text-white">Adquira Capacidade</h2>
-        <p className="text-slate-400 text-lg font-mono">Assinaturas de acesso à infraestrutura MindStack</p>
+    <section className="py-24 md:py-32 px-6 max-w-5xl mx-auto">
+      <div className="text-center mb-16 gap-4 flex flex-col">
+        <h2 className="font-sans font-black text-3xl md:text-5xl text-slate-900">Planos e Limites</h2>
+        <p className="text-slate-500 text-sm md:text-lg font-medium">Abra sua conta MindStack e transacione tempo real de alta qualidade.</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
         {/* Plan 1 */}
-        <div className="bg-slate-900 border border-white/5 rounded-3xl p-8 h-full flex flex-col hover:border-white/20 transition-all">
-          <h3 className="font-sans font-bold text-2xl text-white mb-2">Essencial</h3>
-          <p className="text-slate-400 min-h-[3rem]">O motor básico para organização civil.</p>
-          <div className="text-4xl font-mono text-white my-6 mb-8">$19<span className="text-base text-slate-500">/mo</span></div>
-          <button className="mt-auto w-full py-3 rounded-full border border-white/10 text-white hover:bg-white inset-0 hover:text-slate-950 transition-colors font-medium cursor-pointer">Start Free</button>
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full md:h-[95%] flex flex-col hover:border-slate-300 hover:shadow-lg transition-all">
+          <h3 className="font-black text-xl text-slate-900 mb-2">Conta Corrente</h3>
+          <p className="text-slate-500 text-sm font-medium mb-6">Funcionalidades bancárias diárias para a pessoa física.</p>
+          <div className="text-4xl font-black text-slate-900 mb-8 mt-auto">$0<span className="text-sm font-bold text-slate-400">/mês</span></div>
+          <button className="w-full py-4 rounded-full bg-slate-100 text-slate-900 hover:bg-slate-200 transition-colors font-bold cursor-pointer">Começar Agora</button>
         </div>
         
         {/* Plan 2 */}
-        <div className="bg-indigo-600 border border-indigo-400/30 shadow-[0_0_50px_-12px_rgba(79,70,229,0.5)] rounded-3xl p-10 h-[105%] flex flex-col transform hover:scale-[1.02] transition-all">
-          <div className="bg-white/20 text-white text-xs font-mono px-3 py-1 rounded-full w-fit mb-6">RECOMENDADO</div>
-          <h3 className="font-sans font-bold text-3xl text-white mb-2">Performance</h3>
-          <p className="text-indigo-200 min-h-[3rem]">Capacidade heurística total para profissionais.</p>
-          <div className="text-5xl font-mono text-white my-6 mb-8">$49<span className="text-xl text-indigo-300">/mo</span></div>
-          <button className="mt-auto w-full py-4 rounded-full bg-white text-indigo-900 font-bold hover:bg-indigo-50 transition-colors shadow-lg shadow-white/10 cursor-pointer">Upgrade to Pro</button>
+        <div className="bg-slate-900 border border-slate-800 shadow-float rounded-[2.5rem] p-10 h-full flex flex-col transform md:hover:-translate-y-2 transition-transform">
+          <div className="bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full w-fit mb-6">Platinum</div>
+          <h3 className="font-black text-2xl text-white mb-2">Conta Empresarial</h3>
+          <p className="text-slate-400 text-sm font-medium mb-8">Limites estendidos para gestores e integração de equipes.</p>
+          <div className="text-5xl font-black text-white mb-8 mt-auto">$12<span className="text-base text-slate-500">/mês</span></div>
+          <button className="w-full py-4 rounded-full bg-emerald-500 text-white font-bold hover:bg-emerald-400 transition-colors shadow-glow cursor-pointer">Fazer Upgrade</button>
         </div>
 
         {/* Plan 3 */}
-        <div className="bg-slate-900 border border-white/5 rounded-3xl p-8 h-full flex flex-col hover:border-white/20 transition-all">
-          <h3 className="font-sans font-bold text-2xl text-white mb-2">Enterprise</h3>
-          <p className="text-slate-400 min-h-[3rem]">Protocolo em nuvem dedicado para corporações.</p>
-          <div className="text-4xl font-mono text-white my-6 mb-8">Customizado</div>
-          <button className="mt-auto w-full py-3 rounded-full border border-white/10 text-white hover:bg-white hover:text-slate-950 transition-colors font-medium cursor-pointer">Contactar Sales</button>
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full md:h-[95%] flex flex-col hover:border-slate-300 hover:shadow-lg transition-all">
+          <h3 className="font-black text-xl text-slate-900 mb-2">Conta Offshore</h3>
+          <p className="text-slate-500 text-sm font-medium mb-6">Sistemas completos e servidores de IA dedicados.</p>
+          <div className="text-3xl font-black text-slate-900 mb-8 mt-auto">Personalizado</div>
+          <button className="w-full py-4 rounded-full border border-slate-200 text-slate-900 hover:bg-slate-50 transition-colors font-bold cursor-pointer">Falar com Consultor</button>
         </div>
       </div>
     </section>
@@ -440,37 +681,40 @@ const PricingSection = () => {
 // ==============================
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 rounded-t-[4rem] border-t border-white/5 pt-24 pb-12 px-6 md:px-16 mt-20">
+    <footer className="bg-slate-50 border-t border-slate-200 pt-16 md:pt-20 pb-12 px-6 md:px-16 mt-10 md:mt-20">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
         <div className="max-w-sm">
-          <span className="text-3xl font-bold tracking-tight text-white mb-4 block">MindStack</span>
-          <p className="text-slate-400 font-medium">Reconstruindo a forma como organizamos o tempo e a arquitetura do pensamento diário.</p>
+          <strong className="text-2xl font-black tracking-tighter text-slate-900 flex items-center gap-2 mb-4">
+             <div className="w-5 h-5 rounded-full bg-emerald-500"></div>
+             MindStack
+          </strong>
+          <p className="text-slate-500 font-medium text-sm leading-relaxed">Infraestrutura corporativa completa para gerenciar ativos de tempo em escala global.</p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 text-sm font-medium">
-          <div className="flex flex-col gap-4">
-            <span className="font-mono text-slate-500 mb-2 block">SISTEMA</span>
-            <a href="#" className="text-slate-300 hover:text-white transition-colors">Log de Updates</a>
-            <a href="#" className="text-slate-300 hover:text-white transition-colors">Integrações</a>
-            <a href="#" className="text-slate-300 hover:text-white transition-colors">API Pública</a>
+        <div className="grid grid-cols-2 gap-16 md:gap-24 text-sm font-bold text-slate-900">
+          <div className="flex flex-col gap-5">
+            <span className="text-slate-400 text-xs tracking-widest uppercase mb-1">Empresa</span>
+            <a href="#" className="hover:text-emerald-500 transition-colors">Sobre Nós</a>
+            <a href="#" className="hover:text-emerald-500 transition-colors">Carreiras</a>
+            <a href="#" className="hover:text-emerald-500 transition-colors">Imprensa</a>
           </div>
-          <div className="flex flex-col gap-4">
-            <span className="font-mono text-slate-500 mb-2 block">TERMOS</span>
-            <a href="#" className="text-slate-300 hover:text-white transition-colors">Privacidade</a>
-            <a href="#" className="text-slate-300 hover:text-white transition-colors">Segurança</a>
+          <div className="flex flex-col gap-5">
+            <span className="text-slate-400 text-xs tracking-widest uppercase mb-1">Legal</span>
+            <a href="#" className="hover:text-emerald-500 transition-colors">Privacidade</a>
+            <a href="#" className="hover:text-emerald-500 transition-colors">Termos de Uso</a>
           </div>
         </div>
       </div>
       
-      <div className="max-w-6xl mx-auto mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-3 w-3">
+      <div className="max-w-6xl mx-auto mt-16 md:mt-20 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-200">
+          <div className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            <span className="relative inline-flex rounded-full h-w-2.5 w-2.5 bg-emerald-500"></span>
           </div>
-          <span className="font-mono text-xs text-slate-400">Sistema Operacional Online</span>
+          <span className="font-bold text-xs text-slate-600">Servidores Operacionais</span>
         </div>
-        <span className="text-slate-500 text-sm">© {(new Date()).getFullYear()} MindStack Inc.</span>
+        <span className="text-slate-500 text-sm font-semibold">© {(new Date()).getFullYear()} MindStack Platform Inc.</span>
       </div>
     </footer>
   );
@@ -480,10 +724,16 @@ const Footer = () => {
 // Main App Component
 // ==============================
 function App() {
+  const [isCorporatePopupOpen, setIsCorporatePopupOpen] = useState(false);
+  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
+
   return (
-    <div className="relative min-h-screen text-slate-50">
-      <Navbar />
-      <HeroSection />
+    <div className="relative min-h-screen">
+      <CorporateAccessModal isOpen={isCorporatePopupOpen} onClose={() => setIsCorporatePopupOpen(false)} />
+      <LoginModal isOpen={isLoginPopupOpen} onClose={() => setIsLoginPopupOpen(false)} />
+      
+      <Navbar onOpenPopup={() => setIsCorporatePopupOpen(true)} />
+      <HeroSection onOpenLogin={() => setIsLoginPopupOpen(true)} />
       <FeaturesSection />
       <PhilosophySection />
       <ProtocolSection />
