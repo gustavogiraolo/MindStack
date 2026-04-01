@@ -6,39 +6,97 @@ import { ArrowRight, Activity, Zap, ShieldCheck, CreditCard, LayoutGrid, Plus, C
 gsap.registerPlugin(ScrollTrigger);
 
 // ==============================
+// Custom Hook for Modals
+// ==============================
+const useModalLogic = (isOpen, onClose, modalClass, contentRef) => {
+  const [shouldRender, setShouldRender] = useState(isOpen);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    if (isOpen) window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    let ctx = gsap.context(() => {});
+
+    if (isOpen) {
+      setShouldRender(true);
+      document.body.style.overflow = 'hidden';
+      // Esperar 1 frame para o DOM montar
+      requestAnimationFrame(() => {
+        ctx.add(() => {
+          gsap.fromTo(`.${modalClass}-backdrop`, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+          if (contentRef.current) {
+            gsap.fromTo(contentRef.current, 
+              { y: 30, opacity: 0, scale: 0.95 }, 
+              { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out', delay: 0.1 }
+            );
+          }
+        });
+      });
+    } else if (shouldRender) {
+      ctx.add(() => {
+        gsap.to(`.${modalClass}-backdrop`, { opacity: 0, duration: 0.3 });
+        if (contentRef.current) {
+          gsap.to(contentRef.current, { 
+            y: 20, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power3.in',
+            onComplete: () => {
+              setShouldRender(false);
+              document.body.style.overflow = '';
+            }
+          });
+        }
+      });
+    }
+    
+    return () => {
+      ctx.revert();
+      if (isOpen) document.body.style.overflow = '';
+    };
+  }, [isOpen, shouldRender, modalClass, contentRef]);
+
+  return shouldRender;
+};
+
+// ==============================
 // Login Popup Modal
 // ==============================
 const LoginModal = ({ isOpen, onClose }) => {
   const modalRef = useRef(null);
+  const shouldRender = useModalLogic(isOpen, onClose, 'login', modalRef);
+  const [status, setStatus] = useState('idle');
 
-  useEffect(() => {
-    if (isOpen) {
-      gsap.fromTo('.login-backdrop', { opacity: 0 }, { opacity: 1, duration: 0.3 });
-      gsap.fromTo(modalRef.current, 
-        { y: 30, opacity: 0, scale: 0.95 }, 
-        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out', delay: 0.1 }
-      );
-    }
-  }, [isOpen]);
+  if (!shouldRender) return null;
 
-  if (!isOpen) return null;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (status !== 'idle') return;
+    setStatus('loading');
+    setTimeout(() => {
+      setStatus('success');
+      setTimeout(() => { onClose(); setStatus('idle'); }, 1500);
+    }, 1200);
+  };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center px-4" aria-modal="true" role="dialog">
       {/* Backdrop */}
       <div 
-        className="login-backdrop absolute inset-0 bg-slate-900/30 backdrop-blur-md"
+        className="login-backdrop absolute inset-0 bg-slate-900/40 backdrop-blur-md"
         onClick={onClose}
       ></div>
       
       {/* Modal Dialog */}
       <div 
         ref={modalRef} 
-        className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 md:p-10 shadow-float"
+        className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 md:p-10 shadow-float z-10"
       >
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 w-10 h-10 bg-slate-50 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+          className="absolute top-6 right-6 w-10 h-10 bg-slate-50 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:ring-2 focus:ring-emerald-500 outline-none"
         >
           <X size={20} />
         </button>
@@ -52,20 +110,27 @@ const LoginModal = ({ isOpen, onClose }) => {
           <p className="text-slate-500 font-medium text-sm">Abra sua conta MindStack para otimizar fluxos</p>
         </div>
 
-        <form className="flex flex-col gap-4 mb-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="flex flex-col gap-4 mb-6" onSubmit={handleSubmit}>
           <div className="text-left w-full">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Email Workspace</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input 
                 type="email" 
+                required
                 placeholder="nome@empresa.com" 
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-400 placeholder:font-medium"
               />
             </div>
           </div>
-          <button className="w-full mt-4 py-4 rounded-2xl bg-emerald-500 text-white font-bold text-lg hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-glow flex justify-center items-center gap-2">
-            Continuar para Foco <ArrowRight size={18} />
+          <button 
+             type="submit"
+             disabled={status !== 'idle'} 
+             className={`w-full mt-4 py-4 rounded-2xl font-bold text-lg transition-all shadow-glow flex justify-center items-center gap-2 ${status === 'success' ? 'bg-emerald-600 text-white' : 'bg-emerald-500 hover:bg-emerald-600 text-white active:scale-[0.98]'}`}
+          >
+            {status === 'idle' && <>Continuar para Foco <ArrowRight size={18} /></>}
+            {status === 'loading' && <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+            {status === 'success' && <><Check size={18} /> Acesso Liberado</>}
           </button>
         </form>
         
@@ -75,8 +140,8 @@ const LoginModal = ({ isOpen, onClose }) => {
           <div className="flex-1 h-px bg-slate-200"></div>
         </div>
 
-        <button className="w-full py-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white font-bold hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-          Entrar com conta Coporativa
+        <button className="w-full py-4 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white font-bold hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-3 focus:ring-2 focus:ring-slate-400 outline-none">
+          Entrar com conta Corporativa
         </button>
         
         <p className="text-xs text-center text-slate-400 font-semibold mt-8 px-4 leading-relaxed">
@@ -92,24 +157,15 @@ const LoginModal = ({ isOpen, onClose }) => {
 // ==============================
 const CorporateAccessModal = ({ isOpen, onClose }) => {
   const modalRef = useRef(null);
+  const shouldRender = useModalLogic(isOpen, onClose, 'corp', modalRef);
 
-  useEffect(() => {
-    if (isOpen) {
-      gsap.fromTo('.modal-backdrop', { opacity: 0 }, { opacity: 1, duration: 0.3 });
-      gsap.fromTo(modalRef.current, 
-        { y: 30, opacity: 0, scale: 0.95 }, 
-        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out', delay: 0.1 }
-      );
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-      <div className="modal-backdrop absolute inset-0 bg-slate-900/30 backdrop-blur-md" onClick={onClose}></div>
-      <div ref={modalRef} className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-10 shadow-float">
-        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 bg-slate-50 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" aria-modal="true" role="dialog">
+      <div className="corp-backdrop absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={onClose}></div>
+      <div ref={modalRef} className="relative w-full max-w-lg bg-white rounded-[2.5rem] p-8 md:p-10 shadow-float z-10">
+        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 bg-slate-50 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:ring-2 focus:ring-emerald-500 outline-none">
           <X size={20} />
         </button>
         
@@ -117,18 +173,18 @@ const CorporateAccessModal = ({ isOpen, onClose }) => {
           <div className="w-14 h-14 bg-emerald-100 rounded-[1.2rem] flex items-center justify-center mb-6">
              <Zap size={28} className="text-emerald-500" />
           </div>
-          <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Acesso Coporativo</h2>
+          <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Acesso Corporativo</h2>
           <p className="text-slate-500 font-medium text-base leading-relaxed">Como você gostaria de otimizar a produtividade e a economia de tempo da sua operação?</p>
         </div>
 
         <div className="flex flex-col gap-3 mb-8">
           {[
-            'Escalar Foco Individual (C-Level)',
-            'Gerenciar Tempo de Múltiplas Equipes',
-            'Integração com ERP e Sistemas Legados'
-          ].map((opt, i) => (
-            <button key={i} className="w-full text-left px-6 py-4 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-glow transition-all group flex items-center justify-between">
-              <span className="font-bold text-slate-800 group-hover:text-emerald-700">{opt}</span>
+            { id: 'c-level', label: 'Escalar Foco Individual (C-Level)' },
+            { id: 'teams', label: 'Gerenciar Tempo de Múltiplas Equipes' },
+            { id: 'erp', label: 'Integração com ERP e Sistemas Legados' }
+          ].map((opt) => (
+            <button key={opt.id} className="w-full text-left px-6 py-4 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-glow transition-all group flex items-center justify-between focus:ring-2 focus:ring-emerald-500 outline-none">
+              <span className="font-bold text-slate-800 group-hover:text-emerald-700">{opt.label}</span>
               <ArrowRight size={18} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
             </button>
           ))}
@@ -158,10 +214,10 @@ const Navbar = ({ onOpenPopup }) => {
   }, []);
 
   return (
-    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
+    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6 md:px-12 lg:px-20">
       <nav
         ref={navRef}
-        className="flex items-center justify-between w-full max-w-5xl px-8 py-3 transition-all duration-300 border border-transparent rounded-[2rem] nav-base bg-white/70 backdrop-blur-md [&.nav-scrolled]:bg-white/90 [&.nav-scrolled]:shadow-soft [&.nav-scrolled]:border-slate-200"
+        className="flex items-center justify-between w-full max-w-7xl px-6 md:px-8 py-3 md:py-4 transition-all duration-300 border border-transparent rounded-[2rem] nav-base bg-white/70 backdrop-blur-md [&.nav-scrolled]:bg-white/90 [&.nav-scrolled]:shadow-soft [&.nav-scrolled]:border-slate-200"
       >
         <span className="text-2xl font-black tracking-tighter text-slate-900 flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-emerald-500"></div>
@@ -242,12 +298,16 @@ const HeroSection = ({ onOpenLogin }) => {
   }));
 
   return (
-    <section ref={containerRef} className="relative flex flex-col justify-center items-center text-center w-full min-h-[90dvh] pt-32 pb-24 px-6 md:px-16 overflow-hidden bg-slate-50">
+    <section ref={containerRef} className="relative flex flex-col justify-center items-center text-center w-full min-h-[95dvh] pt-40 pb-20 md:pb-32 px-6 md:px-12 lg:px-20 overflow-hidden bg-slate-50">
       
       {/* Background Graphic with Animation */}
-      <div className="absolute top-0 left-0 right-0 bottom-0 overflow-hidden pointer-events-none z-0 flex justify-center items-center">
-        <div className="absolute w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-emerald-400/20 blur-[100px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-blob"></div>
-        <div className="absolute w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-blue-300/10 blur-[100px] rounded-full top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/3 animate-blob" style={{animationDelay: '2s'}}></div>
+      <div className="absolute top-0 left-0 right-0 bottom-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+            <div className="w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-emerald-400/20 blur-[100px] rounded-full animate-blob"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/3 flex items-center justify-center">
+            <div className="w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-blue-300/10 blur-[100px] rounded-full animate-blob" style={{ animationDelay: '2s' }}></div>
+        </div>
       </div>
       
       {/* Background Particles that interact with Scroll */}
@@ -255,20 +315,21 @@ const HeroSection = ({ onOpenLogin }) => {
         {particles.map(p => (
           <div 
             key={p.id} 
-            className="hero-particle absolute rounded-full bg-emerald-500/20"
+            className="hero-particle absolute rounded-full bg-emerald-500/20 shadow-glow"
             data-speed={p.speed}
             style={{ 
               width: p.width, 
               height: p.width, 
               left: `${p.left}%`, 
               top: `${p.top}%`, 
-              animation: `blob ${4 + p.delay}s infinite alternate ease-in-out` 
+              /* Animação 'pulse' inline para evitar conflito com transform.translate */
+              animation: `pulse ${4 + p.delay}s infinite alternate ease-in-out` 
             }}
           />
         ))}
       </div>
 
-      <div ref={contentRef} className="relative z-10 max-w-4xl flex flex-col items-center">
+      <div ref={contentRef} className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
         <div className="hero-element inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-8">
           <Zap size={16} className="fill-emerald-500" />
           <span>Gestão de Alta Frequência Atualizada</span>
@@ -298,6 +359,34 @@ const HeroSection = ({ onOpenLogin }) => {
             <span>Falar com Vendas</span>
           </button>
         </div>
+      </div>
+    </section>
+  );
+};
+
+// ==============================
+// Brands Section (Marquee)
+// ==============================
+const BrandsSection = () => {
+  // Lista fictícia baseada em empresas com peso "Fintech/Corporate"
+  const brands = ['Vanguard', 'BlackRock', 'J.P. Morgan', 'Goldman Sachs', 'Morgan Stanley', 'Citigroup', 'Berkshire', 'Sequoia'];
+  
+  // Duplicamos a lista para que a rolagem (translateX -50%) resulte em um loop 100% contínuo
+  const duplicatedBrands = [...brands, ...brands];
+
+  return (
+    <section className="py-10 bg-white relative overflow-hidden border-b border-slate-100 z-20">
+      <div className="absolute top-0 bottom-0 left-0 w-24 md:w-48 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute top-0 bottom-0 right-0 w-24 md:w-48 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+      
+      <div className="flex animate-marquee whitespace-nowrap items-center w-max">
+        {duplicatedBrands.map((brand, i) => (
+          <div key={i} className="px-10 md:px-16 flex items-center justify-center">
+            <span className="text-2xl md:text-4xl font-sans font-black tracking-tight text-slate-800 opacity-30 hover:opacity-100 hover:scale-110 transition-all duration-300 cursor-pointer origin-center select-none block">
+              {brand}
+            </span>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -486,9 +575,9 @@ const FeaturesSection = () => {
   }, []);
 
   return (
-    <section id="features" ref={sectionRef} className="py-12 px-6 w-full z-10 relative lg:min-h-screen flex flex-col items-center justify-center -mt-10 lg:-mt-20 overflow-hidden pointer-events-auto">
+    <section id="features" ref={sectionRef} className="py-20 md:py-32 px-6 md:px-12 lg:px-20 w-full z-10 relative lg:min-h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-50">
       {/* On mobile, it's a grid (flex-col). On desktop, it overlaps (absolute). */}
-      <div className="relative w-full max-w-[1400px] mx-auto flex flex-col lg:block items-center justify-center gap-8 lg:gap-0 lg:h-[520px] lg:perspective-1000">
+      <div className="relative w-full max-w-7xl mx-auto flex flex-col lg:block items-center justify-center gap-8 lg:gap-0 lg:h-[520px] lg:perspective-1000 mt-10 lg:mt-0">
         
         <div className="feature-card-0 w-full lg:w-[340px] xl:w-[400px] lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 lg:mx-auto min-h-[400px] lg:h-full will-change-transform shadow-2xl rounded-[2.5rem] bg-white">
           <BalanceCard />
@@ -531,8 +620,8 @@ const PhilosophySection = () => {
   }, []);
 
   return (
-    <section id="philosophy" ref={containerRef} className="relative py-24 md:py-32 px-6 md:px-16 bg-white flex items-center border-y border-slate-100">
-      <div className="max-w-4xl mx-auto text-center flex flex-col gap-6 md:gap-10">
+    <section id="philosophy" ref={containerRef} className="relative py-20 md:py-32 px-6 md:px-12 lg:px-20 bg-white flex items-center border-y border-slate-100">
+      <div className="w-full max-w-5xl mx-auto text-center flex flex-col gap-6 md:gap-10">
         <p className="phil-line text-lg md:text-2xl text-slate-500 font-medium">
           Sistemas tradicionais vendem "listas infinitas".
         </p>
@@ -558,16 +647,15 @@ const ProtocolSection = () => {
       cards.forEach((card, i) => {
         if (i === cards.length - 1) return;
         
-        // CSS 'sticky' takes over preserving document flow, so no pin required here.
-        // We only map the scaling and blurring animation to the scrolling overlap.
+        // CSS 'sticky' mantém as cartas no topo
+        // Animamos a escala e a opacidade levemente para criar a ilusão de profundidade sem perder a legibilidade.
         gsap.to(card, {
-          scale: 0.92,
-          opacity: 0.8,
-          filter: 'blur(10px)',
+          scale: 0.95,
+          opacity: 0.4,
           scrollTrigger: {
             trigger: cards[i + 1],
             start: 'top bottom',
-            end: 'top top',
+            end: 'top 100px', // Finaliza a animação quando a próxima carta encostar no topo
             scrub: true,
           }
         });
@@ -640,13 +728,14 @@ const ProtocolSection = () => {
 // ==============================
 const PricingSection = () => {
   return (
-    <section className="py-24 md:py-32 px-6 max-w-5xl mx-auto">
-      <div className="text-center mb-16 gap-4 flex flex-col">
-        <h2 className="font-sans font-black text-3xl md:text-5xl text-slate-900">Planos e Limites</h2>
-        <p className="text-slate-500 text-sm md:text-lg font-medium">Abra sua conta MindStack e transacione tempo real de alta qualidade.</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+    <section className="py-20 md:py-32 bg-white flex flex-col items-center">
+      <div className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
+        <div className="text-center mb-16 md:mb-24 gap-4 flex flex-col">
+          <h2 className="font-sans font-black text-4xl md:text-5xl lg:text-7xl tracking-tight text-slate-900">Planos e Limites</h2>
+          <p className="text-slate-500 text-base md:text-lg font-medium">Abra sua conta MindStack e transacione tempo real de alta qualidade.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8 items-center max-w-6xl mx-auto">
         {/* Plan 1 */}
         <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full md:h-[95%] flex flex-col hover:border-slate-300 hover:shadow-lg transition-all">
           <h3 className="font-black text-xl text-slate-900 mb-2">Conta Corrente</h3>
@@ -672,6 +761,7 @@ const PricingSection = () => {
           <button className="w-full py-4 rounded-full border border-slate-200 text-slate-900 hover:bg-slate-50 transition-colors font-bold cursor-pointer">Falar com Consultor</button>
         </div>
       </div>
+     </div>
     </section>
   );
 };
@@ -681,8 +771,8 @@ const PricingSection = () => {
 // ==============================
 const Footer = () => {
   return (
-    <footer className="bg-slate-50 border-t border-slate-200 pt-16 md:pt-20 pb-12 px-6 md:px-16 mt-10 md:mt-20">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
+    <footer className="bg-slate-50 border-t border-slate-200 py-16 md:py-20 px-6 md:px-12 lg:px-20">
+      <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
         <div className="max-w-sm">
           <strong className="text-2xl font-black tracking-tighter text-slate-900 flex items-center gap-2 mb-4">
              <div className="w-5 h-5 rounded-full bg-emerald-500"></div>
@@ -706,7 +796,7 @@ const Footer = () => {
         </div>
       </div>
       
-      <div className="max-w-6xl mx-auto mt-16 md:mt-20 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+      <div className="w-full max-w-7xl mx-auto mt-16 md:mt-20 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
         <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-200">
           <div className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -734,6 +824,7 @@ function App() {
       
       <Navbar onOpenPopup={() => setIsCorporatePopupOpen(true)} />
       <HeroSection onOpenLogin={() => setIsLoginPopupOpen(true)} />
+      <BrandsSection />
       <FeaturesSection />
       <PhilosophySection />
       <ProtocolSection />

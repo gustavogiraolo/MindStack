@@ -33,6 +33,7 @@ export default {
       },
       animation: {
         'blob': 'blob 10s infinite alternate cubic-bezier(0.4, 0, 0.2, 1)',
+        'marquee': 'marquee 40s linear infinite',
       },
       keyframes: {
         blob: {
@@ -40,6 +41,10 @@ export default {
           '33%': { transform: 'translate(-40%, -60%) scale(1.1)' },
           '66%': { transform: 'translate(-60%, -40%) scale(0.9)' },
           '100%': { transform: 'translate(-50%, -50%) scale(1.05)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         }
       }
     },
